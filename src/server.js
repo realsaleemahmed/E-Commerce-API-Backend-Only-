@@ -2,6 +2,7 @@ require('dotenv').config();
 const express = require('express');
 const connectDB = require('./database/db');
 const productRoutes = require('./routes/product-route');
+const authRoutes = require('./routes/auth-routes');
 
 const app = express();
 
@@ -11,7 +12,13 @@ app.use(express.json());
 app.get('/', (req, res) => {
   res.send('API is running...');
 });
+//routes
 
+//login and register routes
+app.use('/api/auth', authRoutes);
+
+
+//product routes
 app.use('/api/products', productRoutes);
 
 
