@@ -3,14 +3,30 @@ const Product = require('../models/Product');
 
 const createProduct = async (req,res) => {
   try {
-    if(!req.body.title || !req.body.description || !req.body.price || !req.body.category) {
+    if(!req.user || (req.user.role !== 'seller' && req.user.role !== 'admin')) {
+      return res.status(403).json({
+        success: false,
+        message: 'Access denied. Sellers and Admins only.'
+      });
+    }
+    const { title, description, price, category, images } = req.body;
+    if(!title || !description || !price || !category || !req.user._id) {
       return res.status(400).json({
         success: false,
         message: 'All fields are required'
       })
     }
-    const product = new Product(req.body);
+    const product = new Product({
+      title,
+      description,
+      price,
+      category,
+      ...(images && {images}),
+      sellerId: req.user._id
+    })
+
     await product.save();
+
     res.status(201).json({
       success: true,
       message: 'Product created successfully',
@@ -32,8 +48,9 @@ const getAllProducts = async (req,res) => {
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 10;
     const skip = (page - 1) * limit;
-    const products = await Product.find().skip(skip).limit(limit);
+    const products = await Product.find().sort({createdAt: -1}).skip(skip).limit(limit);
     const total = await Product.countDocuments();
+
     res.status(200).json({
       success: true,
       message: 'Products fetched successfully',
@@ -80,23 +97,44 @@ const getProductById = async (req,res) => {
 
 const updateProduct = async (req,res) => {
   try {
-    if(!mongoose.Types.ObjectId.isValid(req.params.id)) {
+    const {id} = req.params;
+
+    if(!mongoose.Types.ObjectId.isValid(id)) {
       return res.status(400).json({
         success: false,
         message: 'Invalid product ID'
       });
-    }    
-    const product = await Product.findByIdAndUpdate(req.params.id, req.body, {new: true});
+    }
+    const product = await Product.findById(id);
+
     if(!product) {
       return res.status(404).json({
         success: false,
         message: 'Product not found'
       })
     }
+    const user = req.user;
+    if(user.role !== 'admin' && product.sellerId.toString() !== user._id.toString()) {
+      return res.status(403).json({
+        success: false,
+        message: 'Access denied. Admins and Sellers only.'
+      });
+    }
+
+    const {title, description, price, category, images} = req.body;
+    const updateData = {};
+    if(title) updateData.title = title;
+    if(description) updateData.description = description;
+    if(price) updateData.price = price;
+    if(category) updateData.category = category;
+    if(images) updateData.images = images;
+
+    const updatedProduct = await Product.findByIdAndUpdate(id, updateData, {new: true});
+
     res.status(200).json({
       success: true,
       message: 'Product updated successfully',
-      data: product
+      data: updatedProduct
     });
   } catch (error) {
     res.status(500).json(
@@ -110,23 +148,36 @@ const updateProduct = async (req,res) => {
 
 const deleteProduct = async (req,res) => {
   try {
-    if(!mongoose.Types.ObjectId.isValid(req.params.id)) {
+    const { id } = req.params;
+    if(!mongoose.Types.ObjectId.isValid(id)) {
       return res.status(400).json({
         success: false,
         message: 'Invalid product ID'
       });
     }
-    const product = await Product.findByIdAndDelete(req.params.id);
+    const product = await Product.findById(id);
+
     if(!product) {
       return res.status(404).json({
         success: false,
         message: 'Product not found'
       })
     }
+    const user = req.user;
+
+    if(user.role !== 'admin' && product.sellerId.toString() !== user._id.toString()) {
+      return res.status(403).json({
+        success: false,
+        message: 'Access denied. Admins and Sellers only.'
+      });
+    }
+
+    const deletedProduct = await Product.findByIdAndDelete(id);
+
     res.status(200).json({
       success: true,
       message: 'Product deleted successfully',
-      data: product
+      data: deletedProduct
     });
   } catch (error) {
     res.status(500).json(
