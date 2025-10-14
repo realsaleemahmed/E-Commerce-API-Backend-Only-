@@ -3,12 +3,7 @@ const Product = require('../models/Product');
 
 const createProduct = async (req,res) => {
   try {
-    if(!req.user || (req.user.role !== 'seller' && req.user.role !== 'admin')) {
-      return res.status(403).json({
-        success: false,
-        message: 'Access denied. Sellers and Admins only.'
-      });
-    }
+
     const { title, description, price, category, images } = req.body;
     if(!title || !description || !price || !category || !req.user._id) {
       return res.status(400).json({
