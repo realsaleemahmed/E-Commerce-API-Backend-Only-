@@ -110,7 +110,7 @@ const updateProduct = async (req,res) => {
       })
     }
     const user = req.user;
-    if(user.role !== 'admin' && product.sellerId.toString() !== user._id.toString()) {
+    if(user.role !== 'admin' && product.sellerId.toString() !== user.id.toString()) {
       return res.status(403).json({
         success: false,
         message: 'Access denied. Admins and Sellers only.'
@@ -161,7 +161,7 @@ const deleteProduct = async (req,res) => {
     }
     const user = req.user;
 
-    if(user.role !== 'admin' && product.sellerId.toString() !== user._id.toString()) {
+    if(user.role !== 'admin' && product.sellerId.toString() !== user.id.toString()) {
       return res.status(403).json({
         success: false,
         message: 'Access denied. Admins and Sellers only.'
