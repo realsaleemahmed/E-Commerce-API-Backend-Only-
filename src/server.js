@@ -17,9 +17,11 @@ app.get('/', (req, res) => {
 //login and register routes
 app.use('/api/auth', authRoutes);
 
-
 //product routes
 app.use('/api/products', productRoutes);
+
+//order routes
+app.use('/api/orders', orderRoutes);
 
 
 const startServer = async () => {
