@@ -8,4 +8,4 @@ const isSellerOrAdmin = (req, res, next) => {
   });
 };
 
-module.exports = isSellerOrAdmin;
+module.exports = {isSellerOrAdmin};

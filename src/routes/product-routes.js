@@ -1,8 +1,8 @@
 const express = require('express');
 const { createProduct, getAllProducts, getProductById,updateProduct,deleteProduct } = require('../controllers/product-controller.js');
 const { createReview, getAllReviews, updateReview, deleteReview } = require('../controllers/review-controller.js');
-const protect  = require('../middlewares/auth-middleware.js');
-const isSellerOrAdmin  = require('../middlewares/seller-and-admin-middleware.js');
+const { protect }  = require('../middlewares/auth-middleware.js');
+const { isSellerOrAdmin }  = require('../middlewares/seller-and-admin-middleware.js');
 const router = express.Router();
 
 router.post('/',protect, isSellerOrAdmin, createProduct);

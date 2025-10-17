@@ -10,4 +10,4 @@ const isAdminUser = (req, res, next) => {
   })
 };
 
-module.exports = isAdminUser;
+module.exports = { isAdminUser };

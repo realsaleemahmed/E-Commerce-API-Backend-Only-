@@ -1,7 +1,9 @@
 const express = require('express');
 
-const {   createOrder, getMyOrders, getOrderById, updateOrderToPaid, updateOrderToDelivered} = require('../controllers/order-controller.js');
-const {protect, isAdminUser}  = require('../middlewares/auth-middleware.js');
+const {  createOrder, getMyOrders, getOrderById, updateOrderToPaid, updateOrderToDelivered} = require('../controllers/order-controller.js');
+const { protect }  = require('../middlewares/auth-middleware.js');
+const { isAdminUser} = require('../middlewares/admin-middleware.js');
+
 
 const router = express.Router();
 
