@@ -50,10 +50,7 @@ const createReview = async (req, res) => {
       success: true,
       message: 'Review created successfully',
       data: review,
-      data: {
-        rating: product.ratings.average,
-        count: product.ratings.count
-      }
+      
     });
   } catch(error) {
     return res.status(500).json(
