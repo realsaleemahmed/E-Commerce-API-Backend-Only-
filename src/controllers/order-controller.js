@@ -1,8 +1,7 @@
-//order controller will contain all the logic related to order management
 const Order = require('../models/order-model');
 const Product = require('../models/Product');
 
-// Create a new order
+
 
 const createOrder = async (req,res) => {
   try {
@@ -59,4 +58,118 @@ const createOrder = async (req,res) => {
       }
     )
   }
+};
+
+const getMyOrders = async (req,res) => {
+  try {
+    const orders = await Order.find({ user: req.user.id });
+
+    res.status(200).json({
+      success: true,
+      data: orders
+    });
+ 
+  } catch (error) {
+    res.status(500).json(
+      {
+        success: false,
+        message: `Server Error ${error.message}`
+      }
+    )
+  }
+};
+
+const getOrderById = async (req,res) => {
+  try {
+    const order = await Order.findById(req.params.id);
+
+    if(!order) {
+      return res.status(404).json({
+        success: false,
+        message: 'Order not found'
+      })
+    }
+    //Permission check
+    const user = req.user;
+    if(user.role !== 'admin' && order.user.toString() !== req.user.id.toString()) {
+      return res.status(403).json({
+        success: false,
+        message: 'Access denied'
+      })
+    }
+
+    res.status(200).json({
+      success: true,
+      data: order
+    });
+
+  } catch(error) {
+    res.status(500).json(
+      {
+        success: false,
+        message: `Server Error ${error.message}`
+      }
+    )
+  }
+};
+
+const updateOrderToPaid = async (req,res) => {
+  try {
+    const order = await Order.findById(req.params.id);
+    if(!order) {
+      return res.status(404).json({
+        success: false,
+        message: 'Order not found'
+      })
+    }
+    order.paymentStatus = 'completed';
+    order.paidAt = Date.now();
+    const updatedOrder = await order.save();
+    res.status(200).json({
+      success: true,
+      message: 'Order payment status updated to paid',
+      data: updatedOrder
+    });
+  } catch (error) {
+    res.status(500).json(
+      {
+        success: false,
+        message: `Server Error ${error.message}`
+      }
+    )
+  }
+};
+
+const updateOrderToDelivered = async (req,res) => {
+  try {
+    const order = await Order.findById(req.params.id);
+    if(!order) {
+      return res.status(404).json({
+        success: false,
+        message: 'Order not found'
+      })
+    }
+    order.orderStatus = 'delivered';
+    order.deliveredAt = Date.now();
+    const updatedOrder = await order.save();
+    
+    res.status(200).json({
+      success: true,
+      message: 'Order status updated to delivered',
+      data: updatedOrder
+    })
+  } catch(error) {
+    res.status(500).json({
+      success: false,
+      message: `Server Error ${error.message}`
+    })
+  }
+};
+
+module.exports = {
+  createOrder,
+  getMyOrders,
+  getOrderById,
+  updateOrderToPaid,
+  updateOrderToDelivered
 }

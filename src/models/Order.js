@@ -51,6 +51,12 @@ paymentStatus: {
   enum: ['pending', 'completed', 'failed'],
   default: 'pending'
 },
+paidAt: {
+  type: Date,
+},
+deliveredAt: {
+  type: Date,
+},
 orderStatus: {
   type: String,
   enum: ['processing', 'shipped', 'delivered', 'cancelled'],
