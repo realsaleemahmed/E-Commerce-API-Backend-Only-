@@ -2,7 +2,7 @@ const mongoose = require('mongoose');
 
 const Cart = require('../models/Cart');
 const Product = require('../models/Product');
-const User = require('../models/User');
+const User = require('../models/User'); // maybe for future user
 
 const addItemToCart = async (req,res) => {
   
@@ -95,9 +95,43 @@ const removeItemFromCart = async (req,res) => {
     }
     cart.items.splice(itemIndex, 1);
     await cart.save();
+    res.status(200).json({
+      success: true,
+      message: 'Item removed from cart successfully'
+    })
   } catch(error) {
     res.status(500).json({
       success: false,
       message: `Server Error ${error.message}`})
   }
+};
+
+const clearCart = async (req,res) => {
+  try {
+    const user = req.user;
+    const cart = await Cart.findOne({user: user.id});
+    if(!cart) {
+      return res.status(404).json({
+        success: false,
+        message: 'Cart not found'
+      })
+    }
+    cart.items = [];
+    await cart.save();
+    res.status(200).json({
+      success: true,
+      message: 'Cart cleared successfully'
+    })
+  } catch(error) {
+    res.status(500).json({
+      success: false,
+      message: `Server Error ${error.message}`})
+  }
+};
+
+module.exports = {
+  addItemToCart,
+  getCart,
+  removeItemFromCart,
+  clearCart
 };
